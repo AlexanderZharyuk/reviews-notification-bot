@@ -46,17 +46,18 @@ if __name__ == '__main__':
     telegram_token = os.getenv('TELEGRAM_TOKEN')
     telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
     bot = telegram.Bot(telegram_token)
+
     timestamp = ''
     url = f'https://dvmn.org/api/long_polling/'
     headers = {
         'Authorization': f'Token {devman_token}',
     }
+    response_tries = 0
 
     while True:
         params = {
             'timestamp': timestamp
         }
-        response_tries = 0
 
         try:
             response = requests.get(url=url, headers=headers, params=params)
@@ -67,6 +68,7 @@ if __name__ == '__main__':
             response_tries += 1
             if response_tries >= 5:
                 time.sleep(60)
+                response_tries = 0
             continue
 
         reviews_info = response.json()
