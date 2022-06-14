@@ -63,7 +63,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.INFO)
     logger.addHandler(MyLogsHandler(bot, telegram_chat_id))
 
-    logger.info('Бот запущен!')
+    logger.info('🔥 Бот запущен!')
     timestamp = ''
     url = f'https://dvmn.org/api/long_polling/'
     headers = {
