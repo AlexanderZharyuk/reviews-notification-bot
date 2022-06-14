@@ -1,6 +1,7 @@
 import os
 import time
 import textwrap
+import logging
 
 import requests
 import telegram
@@ -39,6 +40,9 @@ def send_message(bot: telegram.Bot, chat_id: str, reviews_info: dict) -> None:
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    logging.info('Бот запущен.')
+
     devman_token = os.environ['DEVMAN_TOKEN']
     telegram_token = os.environ['TELEGRAM_TOKEN']
     telegram_chat_id = os.environ['TELEGRAM_CHAT_ID']
