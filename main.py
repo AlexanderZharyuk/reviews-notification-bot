@@ -8,6 +8,8 @@ from typing import NamedTuple
 import requests
 import telegram
 
+from dotenv import load_dotenv
+
 
 logger = logging.getLogger('Logger')
 
@@ -79,6 +81,7 @@ def run_bot(timestamp: str) -> ServerTimestamp:
 
 
 if __name__ == '__main__':
+    load_dotenv()
     devman_token = os.environ['DEVMAN_TOKEN']
     telegram_token = os.environ['TELEGRAM_TOKEN']
     telegram_chat_id = os.environ['TELEGRAM_CHAT_ID']
