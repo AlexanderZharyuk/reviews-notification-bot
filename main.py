@@ -56,7 +56,7 @@ def send_message(bot: telegram.Bot, chat_id: str, reviews_info: dict) -> None:
                      parse_mode=telegram.ParseMode.HTML)
 
 
-def run_bot(timestamp: str) -> str:
+def get_timestamp(timestamp: str) -> str:
     params = {
         'timestamp': timestamp
     }
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     while True:
         try:
-            bot_running = run_bot(timestamp=timestamp)
+            server_timestamp = get_timestamp(timestamp=timestamp)
         except requests.exceptions.ConnectionError:
             response_tries += 1
 
@@ -107,5 +107,5 @@ if __name__ == '__main__':
             logger.exception(msg='Бот упал с ошибкой:')
             continue
 
-        timestamp = bot_running
+        timestamp = server_timestamp
 
