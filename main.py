@@ -3,8 +3,6 @@ import time
 import textwrap
 import logging
 
-from typing import NamedTuple
-
 import requests
 import telegram
 
@@ -58,11 +56,7 @@ def send_message(bot: telegram.Bot, chat_id: str, reviews_info: dict) -> None:
                      parse_mode=telegram.ParseMode.HTML)
 
 
-class ServerTimestamp(NamedTuple):
-    timestamp: str
-
-
-def run_bot(timestamp: str) -> ServerTimestamp:
+def run_bot(timestamp: str) -> str:
     params = {
         'timestamp': timestamp
     }
@@ -77,7 +71,7 @@ def run_bot(timestamp: str) -> ServerTimestamp:
         timestamp = reviews_info['last_attempt_timestamp']
         send_message(bot, telegram_chat_id, reviews_info)
 
-    return ServerTimestamp(timestamp=timestamp)
+    return timestamp
 
 
 if __name__ == '__main__':
@@ -113,5 +107,5 @@ if __name__ == '__main__':
             logger.exception(msg='Бот упал с ошибкой:')
             continue
 
-        timestamp = bot_running.timestamp
+        timestamp = bot_running
 
