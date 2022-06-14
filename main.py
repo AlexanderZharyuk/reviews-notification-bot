@@ -3,6 +3,8 @@ import time
 import textwrap
 import logging
 
+from typing import NamedTuple
+
 import requests
 import telegram
 
@@ -54,6 +56,28 @@ def send_message(bot: telegram.Bot, chat_id: str, reviews_info: dict) -> None:
                      parse_mode=telegram.ParseMode.HTML)
 
 
+class ServerTimestamp(NamedTuple):
+    timestamp: str
+
+
+def run_bot(timestamp: str) -> ServerTimestamp:
+    params = {
+        'timestamp': timestamp
+    }
+
+    response = requests.get(url=url, headers=headers, params=params)
+    response.raise_for_status()
+
+    reviews_info = response.json()
+    if reviews_info['status'] == 'timeout':
+        timestamp = reviews_info['timestamp_to_request']
+    else:
+        timestamp = reviews_info['last_attempt_timestamp']
+        send_message(bot, telegram_chat_id, reviews_info)
+
+    return ServerTimestamp(timestamp=timestamp)
+
+
 if __name__ == '__main__':
     devman_token = os.environ['DEVMAN_TOKEN']
     telegram_token = os.environ['TELEGRAM_TOKEN']
@@ -72,27 +96,19 @@ if __name__ == '__main__':
     response_tries = 0
 
     while True:
-        params = {
-            'timestamp': timestamp
-        }
-
         try:
-            response = requests.get(url=url, headers=headers, params=params)
-            response.raise_for_status()
-        except requests.exceptions.ReadTimeout:
-            logger.warning('TimeOut Error')
-            continue
+            bot_running = run_bot(timestamp=timestamp)
         except requests.exceptions.ConnectionError:
             response_tries += 1
+
             if response_tries >= 5:
                 logger.warning('ConnectionError. Going to sleep 1 min.')
                 time.sleep(60)
                 response_tries = 0
             continue
+        except Exception:
+            logger.exception(msg='Бот упал с ошибкой:')
+            continue
 
-        reviews_info = response.json()
-        if reviews_info['status'] == 'timeout':
-            timestamp = reviews_info['timestamp_to_request']
-        else:
-            timestamp = reviews_info['last_attempt_timestamp']
-            send_message(bot, telegram_chat_id, reviews_info)
+        timestamp = bot_running.timestamp
+
