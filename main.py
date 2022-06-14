@@ -5,8 +5,6 @@ import textwrap
 import requests
 import telegram
 
-from dotenv import load_dotenv
-
 
 def prepare_message(response: dict) -> str:
     message = ''
@@ -41,10 +39,9 @@ def send_message(bot: telegram.Bot, chat_id: str, reviews_info: dict) -> None:
 
 
 if __name__ == '__main__':
-    load_dotenv()
-    devman_token = os.getenv('DEVMAN_TOKEN')
-    telegram_token = os.getenv('TELEGRAM_TOKEN')
-    telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
+    devman_token = os.environ['DEVMAN_TOKEN']
+    telegram_token = os.environ['TELEGRAM_TOKEN']
+    telegram_chat_id = os.environ['TELEGRAM_CHAT_ID']
     bot = telegram.Bot(telegram_token)
 
     timestamp = ''
