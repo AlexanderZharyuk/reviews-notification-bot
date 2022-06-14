@@ -9,11 +9,10 @@ import telegram
 
 class MyLogsHandler(logging.Handler):
 
-    def __init__(self):
+    def __init__(self, bot, chat_id):
         super().__init__()
-        telegram_token = os.environ['TELEGRAM_TOKEN']
-        self.bot = telegram.Bot(telegram_token)
-        self.chat_id = os.environ['TELEGRAM_CHAT_ID']
+        self.bot = bot
+        self.chat_id = chat_id
 
     def emit(self, record):
         log_entry = self.format(record)
@@ -53,12 +52,16 @@ def send_message(bot: telegram.Bot, chat_id: str, reviews_info: dict) -> None:
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    logging.info('Бот запущен.')
-    logger = MyLogsHandler()
-
     devman_token = os.environ['DEVMAN_TOKEN']
+    telegram_token = os.environ['TELEGRAM_TOKEN']
+    telegram_chat_id = os.environ['TELEGRAM_CHAT_ID']
+    bot = telegram.Bot(telegram_token)
 
+    logger = logging.getLogger('Logger')
+    logger.setLevel(logging.INFO)
+    logger.addHandler(MyLogsHandler(bot, telegram_chat_id))
+
+    logger.info('Бот запущен')
     timestamp = ''
     url = f'https://dvmn.org/api/long_polling/'
     headers = {
@@ -75,10 +78,12 @@ if __name__ == '__main__':
             response = requests.get(url=url, headers=headers, params=params)
             response.raise_for_status()
         except requests.exceptions.ReadTimeout:
+            logger.warning('TimeOut Error')
             continue
         except requests.exceptions.ConnectionError:
             response_tries += 1
             if response_tries >= 5:
+                logger.warning('ConnectionError. Going to sleep 1 min.')
                 time.sleep(60)
                 response_tries = 0
             continue
@@ -88,4 +93,4 @@ if __name__ == '__main__':
             timestamp = reviews_info['timestamp_to_request']
         else:
             timestamp = reviews_info['last_attempt_timestamp']
-            send_message(logger.bot, logger.chat_id, reviews_info)
+            send_message(bot, telegram_chat_id, reviews_info)
