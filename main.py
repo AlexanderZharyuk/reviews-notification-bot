@@ -7,6 +7,9 @@ import requests
 import telegram
 
 
+logger = logging.getLogger('Logger')
+
+
 class MyLogsHandler(logging.Handler):
 
     def __init__(self, bot, chat_id):
@@ -57,11 +60,10 @@ if __name__ == '__main__':
     telegram_chat_id = os.environ['TELEGRAM_CHAT_ID']
     bot = telegram.Bot(telegram_token)
 
-    logger = logging.getLogger('Logger')
     logger.setLevel(logging.INFO)
     logger.addHandler(MyLogsHandler(bot, telegram_chat_id))
 
-    logger.info('Бот запущен')
+    logger.info('Бот запущен!')
     timestamp = ''
     url = f'https://dvmn.org/api/long_polling/'
     headers = {
@@ -75,7 +77,7 @@ if __name__ == '__main__':
         }
 
         try:
-            response = requests.get(url=url, headers=headers, params=params)
+            response = requests.get(url=url, headers=headers, params=params, timeout=5)
             response.raise_for_status()
         except requests.exceptions.ReadTimeout:
             logger.warning('TimeOut Error')
