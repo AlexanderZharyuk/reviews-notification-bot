@@ -77,7 +77,7 @@ if __name__ == '__main__':
         }
 
         try:
-            response = requests.get(url=url, headers=headers, params=params, timeout=5)
+            response = requests.get(url=url, headers=headers, params=params)
             response.raise_for_status()
         except requests.exceptions.ReadTimeout:
             logger.warning('TimeOut Error')
