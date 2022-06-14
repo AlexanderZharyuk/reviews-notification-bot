@@ -7,6 +7,19 @@ import requests
 import telegram
 
 
+class MyLogsHandler(logging.Handler):
+
+    def __init__(self):
+        super().__init__()
+        telegram_token = os.environ['TELEGRAM_TOKEN']
+        self.bot = telegram.Bot(telegram_token)
+        self.chat_id = os.environ['TELEGRAM_CHAT_ID']
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        self.bot.send_message(text=log_entry, chat_id=self.chat_id)
+
+
 def prepare_message(response: dict) -> str:
     message = ''
 
@@ -42,11 +55,9 @@ def send_message(bot: telegram.Bot, chat_id: str, reviews_info: dict) -> None:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     logging.info('Бот запущен.')
+    logger = MyLogsHandler()
 
     devman_token = os.environ['DEVMAN_TOKEN']
-    telegram_token = os.environ['TELEGRAM_TOKEN']
-    telegram_chat_id = os.environ['TELEGRAM_CHAT_ID']
-    bot = telegram.Bot(telegram_token)
 
     timestamp = ''
     url = f'https://dvmn.org/api/long_polling/'
@@ -77,4 +88,4 @@ if __name__ == '__main__':
             timestamp = reviews_info['timestamp_to_request']
         else:
             timestamp = reviews_info['last_attempt_timestamp']
-            send_message(bot, telegram_chat_id, reviews_info)
+            send_message(logger.bot, logger.chat_id, reviews_info)
