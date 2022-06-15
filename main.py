@@ -56,24 +56,6 @@ def send_message(bot: telegram.Bot, chat_id: str, reviews_info: dict) -> None:
                      parse_mode=telegram.ParseMode.HTML)
 
 
-def get_timestamp(timestamp: str) -> str:
-    params = {
-        'timestamp': timestamp
-    }
-
-    response = requests.get(url=url, headers=headers, params=params)
-    response.raise_for_status()
-
-    reviews_info = response.json()
-    if reviews_info['status'] == 'timeout':
-        timestamp = reviews_info['timestamp_to_request']
-    else:
-        timestamp = reviews_info['last_attempt_timestamp']
-        send_message(bot, telegram_chat_id, reviews_info)
-
-    return timestamp
-
-
 if __name__ == '__main__':
     load_dotenv()
     devman_token = os.environ['DEVMAN_TOKEN']
@@ -94,7 +76,19 @@ if __name__ == '__main__':
 
     while True:
         try:
-            server_timestamp = get_timestamp(timestamp=timestamp)
+            params = {
+                'timestamp': timestamp
+            }
+
+            response = requests.get(url=url, headers=headers, params=params)
+            response.raise_for_status()
+
+            reviews_info = response.json()
+            if reviews_info['status'] == 'timeout':
+                timestamp = reviews_info['timestamp_to_request']
+            else:
+                timestamp = reviews_info['last_attempt_timestamp']
+                send_message(bot, telegram_chat_id, reviews_info)
         except requests.exceptions.ConnectionError:
             response_tries += 1
 
@@ -106,6 +100,3 @@ if __name__ == '__main__':
         except Exception:
             logger.exception(msg='Бот упал с ошибкой:')
             continue
-
-        timestamp = server_timestamp
-
