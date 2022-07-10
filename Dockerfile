@@ -1,10 +1,9 @@
-FROM python:3.10
+FROM python:alpine
 
-RUN mkdir -p /usr/src/bot
-WORKDIR /usr/src/bot
+WORKDIR /app
 
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
-COPY . /usr/src/bot
+COPY . /app
 
 CMD ["python3", "main.py"]
